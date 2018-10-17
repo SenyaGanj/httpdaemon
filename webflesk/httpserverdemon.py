@@ -3,7 +3,7 @@ import os, sys, daemon, tempfile, webhttpserver
 # reload run method for daemon
 class httpserverdemon(daemon.Daemon):
     def run(self):
-        webhttpserver.runhttpserver('0.0.0.0')
+        webhttpserver.runhttpserver()
 
 
 if __name__ == '__main__':
@@ -11,18 +11,18 @@ if __name__ == '__main__':
     daemon = httpserverdemon(pidFile)
     if len(sys.argv) == 2:
         if 'start' == sys.argv[1]:
-            print("start")
+            print("start daemon!")
             daemon.start()
         elif 'stop' == sys.argv[1]:
-            print("stop")
+            print("stop daemon!")
             daemon.stop()
         elif 'restart' == sys.argv[1]:
-            print("restart")
+            print("restart daemon!")
             daemon.restart()
         else:
             sys.exit(2)
         sys.exit(0)
     else:
-        print('usage: %s start|stop|restart' % sys.argv[0])
+        print('usage: ' + sys.argv[0] + ' start|stop|restart')
         sys.exit(2)
 

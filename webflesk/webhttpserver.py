@@ -1,10 +1,27 @@
 from flask import Flask, request, jsonify, send_file
-import hashlib, os, sys
-
-
+import hashlib, os, sys, json
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = "store"
+
+config = {}
+try:
+    with open("config_server.json", 'r') as f:
+        config = json.loads(f.read())
+except IOError:
+    config = {}
+
+
+host = "0.0.0.0"
+if "host" in config:
+    host = config["host"]
+
+port = "8000"
+if "port" in config:
+    port = config["port"]
+
+storage_path = "store/"
+if "storage_path" in config:
+    storage_path = config["storage_path"]
 
 
 @app.route('/upload', methods=['POST'])
@@ -17,7 +34,7 @@ def upload():
     content = file.read()
     # hash content
     hash = get_hash_md5(content)
-    pathDir = app.config['UPLOAD_FOLDER'] + "/" + hash[0] + hash[1] + "/"
+    pathDir = storage_path + hash[0] + hash[1] + "/"
 
     # if file exist, return this file
     if os.path.exists(pathDir + hash):
@@ -49,7 +66,6 @@ def write_to_file(name, data):
         return False
 
 
-
 @app.route('/download/<string:hash>', methods=['GET'])
 def download(hash):
 
@@ -58,7 +74,7 @@ def download(hash):
 
     hash = hash.strip()
 
-    pathFolder = app.config['UPLOAD_FOLDER'] + "/" + hash[0] + hash[1] + "/"
+    pathFolder = storage_path + hash[0] + hash[1] + "/"
 
     # if file exists, return this file
     if not os.path.exists(pathFolder + hash):
@@ -75,7 +91,7 @@ def delete(hash):
 
     hash = hash.strip()
 
-    pathFolder = app.config['UPLOAD_FOLDER'] + "/" + hash[0] + hash[1] + "/"
+    pathFolder = storage_path + hash[0] + hash[1] + "/"
 
     # if file exists, delete this file
     if not os.path.exists(pathFolder + hash):
@@ -89,5 +105,9 @@ def delete(hash):
 
     return jsonify({"error": "", "status": True}), 201
 
-def runhttpserver(host):
-    app.run(host=host)
+def runhttpserver():
+    app.run(host=host, port=port)
+
+
+'''if __name__ == '__main__':
+    runhttpserver()'''

@@ -17,6 +17,7 @@ class Daemon:
                 sys.exit(0)
         except OSError:
             sys.stderr.write("fork #1 failed")
+            sys.exit(1)
 
         # decouple from parent environment
         os.setsid()
@@ -44,7 +45,7 @@ class Daemon:
         atexit.register(self.delpid)
         # write pidfile
         pid = str(os.getpid())
-        open(self.pidfile, 'w+').write("%s\n" % pid)
+        open(self.pidfile, 'w+').write(pid + "\n")
 
         # redirect standard file descriptors
         os.dup2(si.fileno(), sys.stdin.fileno())
@@ -64,8 +65,7 @@ class Daemon:
             pid = None
 
         if pid:
-            message = "pidfile %s already exist.\n"
-            sys.stderr.write(message % self.pidfile)
+            sys.stderr.write("pidfile " + self.pidfile + " already exist.\n")
             sys.exit(1)
 
         # Start the daemon
@@ -83,8 +83,7 @@ class Daemon:
             pid = None
 
         if not pid:
-            message = "pidfile %s does not exist.\n"
-            sys.stderr.write(message % self.pidfile)
+            sys.stderr.write("pidfile " + self.pidfile + " does not exist.\n")
             return
 
         # Try killing the daemon process
